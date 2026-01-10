@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Solar System Simulator 3D</title>
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600&family=Fraunces:opsz,wght@9..144,600&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div class="app">
+      <main class="stage">
+        <div id="scene" class="scene"></div>
+        <header class="hero">
+          <div>
+            <p class="eyebrow">Orbital Sandbox</p>
+            <h1>Solar System 3D</h1>
+            <p class="lead">Rotate, pan, and zoom the live orbit map.</p>
+          </div>
+          <div class="stats">
+            <div>
+              <span class="label">Focus</span>
+              <span class="value" id="focusName">Sun</span>
+            </div>
+            <div>
+              <span class="label">Sim Time</span>
+              <span class="value" id="simTime">0 days</span>
+            </div>
+            <div>
+              <span class="label">FPS</span>
+              <span class="value" id="fps">--</span>
+            </div>
+          </div>
+        </header>
+        <aside class="controls is-collapsed" id="controlsPanel">
+          <div class="controls-mini">
+            <button class="controls-toggle" id="controlsToggle" type="button">
+              Controls
+            </button>
+            <button class="mini-toggle" id="labelsMini" type="button" aria-pressed="true">
+              Labels
+            </button>
+            <button class="mini-toggle" id="trailsMini" type="button" aria-pressed="false">
+              Orbits
+            </button>
+            <span class="mini-credit">made by Dobuzi</span>
+          </div>
+          <div class="controls-content">
+            <div class="controls-grid">
+            <label>
+            Time scale
+            <input id="speed" type="range" min="1" max="5" step="1" value="2" />
+            <span id="speedValue">50000x</span>
+          </label>
+            <label>
+              Orbit scale
+              <input id="scale" type="range" min="0.6" max="2.2" step="0.05" value="1" />
+              <span id="scaleValue">1.00x</span>
+            </label>
+            <label>
+              Focus planet
+              <select id="focus"></select>
+            </label>
+            <label>
+              Calendar date
+              <input id="calendarDate" type="date" />
+            </label>
+            <div class="camera">
+              <p class="camera-title">View point</p>
+              <div class="camera-actions">
+                <button data-view="iso">Isometric</button>
+                <button data-view="top">Top</button>
+                <button data-view="side">Side</button>
+              </div>
+              <label>
+                Camera distance
+                <input id="cameraDistance" type="range" min="20" max="240" step="2" value="100" />
+                <span id="cameraValue">100</span>
+              </label>
+            </div>
+            <div class="actions">
+              <button id="pause">Pause</button>
+              <button id="reset">Reset view</button>
+            </div>
+            <p class="hint">
+              Tip: drag to orbit the camera, right-drag to pan, and scroll to zoom.
+            </p>
+            </div>
+          </div>
+        </aside>
+      </main>
+    </div>
+
+    <script src="vendor/three/three.min.js"></script>
+    <script src="assets/planet-textures.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>

@@ -1,0 +1,369 @@
+:root {
+  color-scheme: light;
+  --bg: #f5efe6;
+  --bg-ink: #1a1a1a;
+  --accent: #f27457;
+  --accent-dark: #2c2842;
+  --panel: #fff7ec;
+  --panel-border: #e4d8c7;
+  --glow: rgba(242, 116, 87, 0.3);
+  --shadow: rgba(26, 26, 26, 0.08);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  min-height: 100svh;
+  height: 100vh;
+  height: 100svh;
+  overflow: hidden;
+  font-family: "Space Grotesk", "Segoe UI", sans-serif;
+  color: var(--bg-ink);
+  background: radial-gradient(circle at top left, #ffe9d6, var(--bg));
+}
+
+.app {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  padding: 0;
+  gap: 0;
+}
+
+.hero {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  right: 16px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+  flex-wrap: wrap;
+  color: #f8f3ea;
+  z-index: 3;
+}
+
+.eyebrow {
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  font-size: 12px;
+  color: rgba(248, 243, 234, 0.7);
+  margin: 0 0 10px;
+}
+
+h1 {
+  font-family: "Fraunces", "Times New Roman", serif;
+  font-size: clamp(2.4rem, 3.2vw, 3.4rem);
+  margin: 0 0 10px;
+}
+
+.lead {
+  font-size: 1rem;
+  max-width: 520px;
+  line-height: 1.6;
+  margin: 0;
+  color: rgba(248, 243, 234, 0.85);
+}
+
+.stats {
+  display: grid;
+  gap: 12px;
+  padding: 16px 18px;
+  background: rgba(12, 14, 26, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+  backdrop-filter: blur(12px) saturate(140%);
+  -webkit-backdrop-filter: blur(12px) saturate(140%);
+  border-radius: 16px;
+  min-width: 200px;
+}
+
+.stats .label {
+  display: block;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  font-size: 11px;
+  color: rgba(230, 233, 247, 0.7);
+}
+
+.stats .value {
+  font-weight: 600;
+  font-size: 16px;
+  color: #f4f6ff;
+}
+
+.stage {
+  position: relative;
+  display: flex;
+  flex: 1;
+  height: 100%;
+  min-height: 0;
+}
+
+.scene {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  border-radius: 0;
+  background: radial-gradient(circle at 20% 20%, #1a1a2e, #0d0c1b 60%, #05040b);
+  box-shadow: 0 20px 50px rgba(10, 10, 30, 0.35);
+  overflow: hidden;
+  position: relative;
+}
+
+.controls {
+  position: absolute;
+  bottom: 18px;
+  left: 18px;
+  width: min(320px, 90vw);
+  max-height: calc(100svh - 140px);
+  background: rgba(12, 14, 26, 0.45);
+  border-radius: 18px;
+  padding: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25);
+  backdrop-filter: blur(12px) saturate(140%);
+  -webkit-backdrop-filter: blur(12px) saturate(140%);
+  transition: transform 0.2s ease, opacity 0.2s ease;
+  z-index: 4;
+}
+
+.controls.is-collapsed .controls-content {
+  display: none;
+}
+
+.controls-toggle {
+  align-self: flex-start;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  background: rgba(255, 255, 255, 0.08);
+  color: #f4f6ff;
+  border-radius: 12px;
+  padding: 6px 12px;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.controls.is-collapsed {
+  width: auto;
+  padding: 8px;
+}
+
+.controls-content {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  overflow: auto;
+}
+
+.controls-mini {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.mini-credit {
+  margin-left: auto;
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(244, 246, 255, 0.6);
+}
+
+.mini-toggle {
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(244, 246, 255, 0.85);
+  border-radius: 999px;
+  padding: 4px 10px;
+  font-size: 0.78rem;
+  cursor: pointer;
+  transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+.mini-toggle.is-active {
+  background: rgba(244, 246, 255, 0.22);
+  border-color: rgba(244, 246, 255, 0.5);
+  color: #ffffff;
+}
+
+.controls.is-collapsed .controls-mini {
+  gap: 8px;
+}
+
+.controls.is-collapsed .mini-toggle {
+  display: flex;
+}
+
+.controls-grid {
+  display: grid;
+  gap: 12px 14px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: center;
+}
+
+.controls-grid h2,
+.controls-grid .camera,
+.controls-grid .actions,
+.controls-grid .hint {
+  grid-column: 1 / -1;
+}
+
+.controls-grid .toggle {
+  grid-column: span 1;
+}
+
+.controls h2 {
+  margin: 0;
+  font-size: 1.2rem;
+}
+
+.controls label {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 0.9rem;
+  color: rgba(244, 246, 255, 0.9);
+}
+
+.controls input[type="range"] {
+  accent-color: var(--accent);
+}
+
+.toggle {
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+}
+
+.controls select,
+.controls button {
+  font-family: inherit;
+  font-size: 0.9rem;
+  padding: 8px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  background: rgba(255, 255, 255, 0.08);
+  color: #f4f6ff;
+}
+
+.controls button {
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.controls button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.28);
+}
+
+.actions {
+  display: flex;
+  gap: 10px;
+}
+
+.camera {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 12px;
+  border-radius: 14px;
+  border: 1px dashed var(--panel-border);
+}
+
+.camera-title {
+  margin: 0;
+  font-weight: 600;
+  color: rgba(244, 246, 255, 0.9);
+}
+
+.camera-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.hint {
+  margin: 0;
+  font-size: 0.8rem;
+  color: rgba(220, 228, 250, 0.75);
+}
+
+.footer {
+  font-size: 0.8rem;
+  color: #6a5b4c;
+}
+
+@media (max-width: 900px) {
+  .controls {
+    max-height: calc(100svh - 120px);
+  }
+}
+
+@media (max-width: 600px) {
+  .app {
+    padding: 0;
+    gap: 0;
+  }
+
+  .hero {
+    top: 12px;
+    left: 12px;
+    right: 12px;
+    gap: 12px;
+  }
+
+  h1 {
+    font-size: clamp(2rem, 8vw, 2.6rem);
+  }
+
+  .stats {
+    width: 100%;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    text-align: center;
+  }
+
+  .stage {
+    flex: 1;
+  }
+
+  .scene {
+    border-radius: 0;
+  }
+
+  .controls {
+    right: 12px;
+    left: 12px;
+    top: auto;
+    bottom: 12px;
+    width: auto;
+    padding: 12px;
+    max-height: 45svh;
+  }
+
+  .controls-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .controls label {
+    font-size: 0.85rem;
+  }
+
+  .actions {
+    flex-direction: column;
+  }
+}
