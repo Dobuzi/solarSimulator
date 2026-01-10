@@ -15,6 +15,9 @@ const cameraValue = document.getElementById("cameraValue");
 const calendarDate = document.getElementById("calendarDate");
 const controlsPanel = document.getElementById("controlsPanel");
 const controlsToggle = document.getElementById("controlsToggle");
+const loadingIndicator = document.getElementById("loadingIndicator");
+const loadingProgress = document.getElementById("loadingProgress");
+const loadingLabel = document.getElementById("loadingLabel");
 
 const focusName = document.getElementById("focusName");
 const simTimeLabel = document.getElementById("simTime");
@@ -319,7 +322,8 @@ scene.fog = new THREE.Fog(0x05040b, 30, 160);
 
 const camera = new THREE.PerspectiveCamera(50, 1, 0.1, 500);
 
-const textureLoader = new THREE.TextureLoader();
+const loadingManager = new THREE.LoadingManager();
+const textureLoader = new THREE.TextureLoader(loadingManager);
 const planetTextureData = window.PLANET_TEXTURES || {};
 const planetTextures = new Map();
 const planetTextureCallbacks = new Map();
@@ -337,6 +341,40 @@ const planetTextureFiles = {
   SaturnRing: "saturn_ring.png",
   Uranus: "uranus.jpg",
   Neptune: "neptune.jpg",
+};
+
+const LOADING_RING_CIRCUMFERENCE = 2 * Math.PI * 15.5;
+
+function setLoadingProgress(progress) {
+  if (!loadingIndicator || !loadingProgress) return;
+  const clamped = Math.max(0, Math.min(1, progress));
+  const offset = LOADING_RING_CIRCUMFERENCE * (1 - clamped);
+  loadingProgress.style.strokeDasharray = `${LOADING_RING_CIRCUMFERENCE}`;
+  loadingProgress.style.strokeDashoffset = `${offset}`;
+  if (loadingLabel) {
+    loadingLabel.textContent = `${Math.round(clamped * 100)}%`;
+  }
+  if (clamped >= 1) {
+    loadingIndicator.classList.remove("is-visible");
+    loadingIndicator.setAttribute("aria-hidden", "true");
+  } else {
+    loadingIndicator.classList.add("is-visible");
+    loadingIndicator.setAttribute("aria-hidden", "false");
+  }
+}
+
+loadingManager.onStart = () => {
+  setLoadingProgress(0);
+};
+
+loadingManager.onProgress = (_url, itemsLoaded, itemsTotal) => {
+  if (itemsTotal > 0) {
+    setLoadingProgress(itemsLoaded / itemsTotal);
+  }
+};
+
+loadingManager.onLoad = () => {
+  setLoadingProgress(1);
 };
 
 function dataUrlToBlob(dataUrl) {

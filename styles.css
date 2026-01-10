@@ -308,6 +308,61 @@ h1 {
   color: #6a5b4c;
 }
 
+.loading-indicator {
+  position: fixed;
+  bottom: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(12, 14, 28, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+  z-index: 40;
+}
+
+.loading-indicator.is-visible {
+  opacity: 1;
+}
+
+.loading-ring {
+  width: 28px;
+  height: 28px;
+  transform: rotate(-90deg);
+}
+
+.loading-ring__track,
+.loading-ring__progress {
+  fill: none;
+  stroke-width: 3;
+}
+
+.loading-ring__track {
+  stroke: rgba(255, 255, 255, 0.15);
+}
+
+.loading-ring__progress {
+  stroke: rgba(255, 214, 140, 0.95);
+  stroke-linecap: round;
+  stroke-dasharray: 97.4;
+  stroke-dashoffset: 97.4;
+  transition: stroke-dashoffset 0.2s ease;
+}
+
+.loading-label {
+  font-size: 0.7rem;
+  letter-spacing: 0.04em;
+  color: rgba(255, 255, 255, 0.7);
+}
+
 @media (max-width: 900px) {
   .controls {
     max-height: calc(100svh - 120px);
