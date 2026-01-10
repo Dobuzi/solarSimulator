@@ -24,6 +24,7 @@ if (!THREE) {
   throw new Error("THREE is not available. Ensure vendor/three/three.min.js is loaded.");
 }
 
+const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 const ORBIT_SCALE = 9.5;
 const SUN_RADIUS = 2.1;
 const DEG_TO_RAD = Math.PI / 180;
@@ -41,6 +42,12 @@ const MOON_RADIUS_KM = 1737;
 const SATELLITE_DISTANCE_MULT = 2.2;
 const SATELLITE_DISTANCE_SCALE = (MOON_ORBIT_DISTANCE / MOON_DISTANCE_KM) * SATELLITE_DISTANCE_MULT;
 const SATELLITE_MIN_ORBIT_FACTOR = 2.2;
+const TEXTURE_BASE_PATH = isMobile ? "assets/textures/1k" : "assets/textures";
+const PLANET_SEGMENTS = isMobile ? 16 : 24;
+const MOON_SEGMENTS = isMobile ? 16 : 24;
+const SUN_SEGMENTS = isMobile ? 24 : 32;
+const RING_SEGMENTS = isMobile ? 160 : 256;
+const STAR_COUNT = isMobile ? 600 : 1200;
 const SATELLITE_RADIUS_SCALE = MOON_RADIUS / MOON_RADIUS_KM;
 
 const satellites = [
@@ -297,7 +304,8 @@ function setTimeFromDateInput(value) {
 }
 
 const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-renderer.setPixelRatio(window.devicePixelRatio || 1);
+const deviceRatio = window.devicePixelRatio || 1;
+renderer.setPixelRatio(Math.min(deviceRatio, isMobile ? 1.25 : 2));
 renderer.setClearColor(0x000000, 0);
 if (renderer.outputColorSpace !== undefined) {
   renderer.outputColorSpace = THREE.SRGBColorSpace;
@@ -316,6 +324,20 @@ const planetTextureData = window.PLANET_TEXTURES || {};
 const planetTextures = new Map();
 const planetTextureCallbacks = new Map();
 let fallbackEarthTexture = null;
+const planetTextureFiles = {
+  Sun: "sun.jpg",
+  Mercury: "mercury.jpg",
+  Venus: "venus.jpg",
+  Earth: "earth.jpg",
+  EarthClouds: "earth_clouds.jpg",
+  Moon: "moon.jpg",
+  Mars: "mars.jpg",
+  Jupiter: "jupiter.jpg",
+  Saturn: "saturn.jpg",
+  SaturnRing: "saturn_ring.png",
+  Uranus: "uranus.jpg",
+  Neptune: "neptune.jpg",
+};
 
 function dataUrlToBlob(dataUrl) {
   const commaIndex = dataUrl.indexOf(",");
@@ -340,7 +362,8 @@ function configureTexture(texture) {
   } else {
     texture.encoding = THREE.sRGBEncoding;
   }
-  texture.anisotropy = renderer.capabilities.getMaxAnisotropy();
+  const maxAniso = renderer.capabilities.getMaxAnisotropy();
+  texture.anisotropy = Math.min(maxAniso, isMobile ? 2 : 8);
   texture.generateMipmaps = false;
   texture.minFilter = THREE.LinearFilter;
   texture.magFilter = THREE.LinearFilter;
@@ -608,6 +631,37 @@ function loadPlanetTexture(name, onLoad) {
     return;
   }
 
+  const fileName = planetTextureFiles[name];
+  if (fileName) {
+    const url = `${TEXTURE_BASE_PATH}/${fileName}`;
+    planetTextures.set(name, null);
+    planetTextureCallbacks.set(name, [onLoad]);
+    textureLoader.load(
+      url,
+      (texture) => {
+        configureTexture(texture);
+        planetTextures.set(name, texture);
+        const callbacks = planetTextureCallbacks.get(name) || [];
+        callbacks.forEach((cb) => cb(texture));
+        planetTextureCallbacks.delete(name);
+      },
+      undefined,
+      () => {
+        const fallback =
+          name === "Saturn"
+            ? createFallbackSaturnTexture()
+            : name === "Uranus"
+            ? createFallbackUranusTexture()
+            : null;
+        planetTextures.set(name, fallback);
+        const callbacks = planetTextureCallbacks.get(name) || [];
+        callbacks.forEach((cb) => cb(fallback));
+        planetTextureCallbacks.delete(name);
+      }
+    );
+    return;
+  }
+
   const dataUrl = planetTextureData[name];
   if (!dataUrl || !dataUrl.startsWith("data:image/")) {
     planetTextures.set(name, null);
@@ -725,7 +779,7 @@ sunLight.position.set(0, 0, 0);
 scene.add(sunLight);
 
 const starGeometry = new THREE.BufferGeometry();
-const starCount = 1200;
+const starCount = STAR_COUNT;
 const starPositions = new Float32Array(starCount * 3);
 const starSizes = new Float32Array(starCount);
 for (let i = 0; i < starCount; i += 1) {
@@ -801,7 +855,7 @@ loadPlanetTexture("Sun", (texture) => {
   sunMaterial.color = new THREE.Color(0xffffff);
   sunMaterial.needsUpdate = true;
 });
-const sun = new THREE.Mesh(new THREE.SphereGeometry(SUN_RADIUS, 32, 32), sunMaterial);
+const sun = new THREE.Mesh(new THREE.SphereGeometry(SUN_RADIUS, SUN_SEGMENTS, SUN_SEGMENTS), sunMaterial);
 sun.userData.rotationDays = 25.38;
 sun.userData.name = "Sun";
 scene.add(sun);
@@ -1044,7 +1098,7 @@ function buildScene() {
     pivot.rotation.x = (planet.tiltDeg || 0) * DEG_TO_RAD;
     planetGroup.add(pivot);
 
-    const geometry = new THREE.SphereGeometry(planet.radius, 24, 24);
+    const geometry = new THREE.SphereGeometry(planet.radius, PLANET_SEGMENTS, PLANET_SEGMENTS);
     const materialOptions = { color: planet.color, roughness: 0.6, metalness: 0.08 };
     const wantsTexture = ["Mercury", "Venus", "Earth", "Mars", "Jupiter", "Saturn", "Uranus", "Neptune"].includes(
       planet.name
@@ -1071,7 +1125,7 @@ function buildScene() {
       depthWrite: false,
     });
     const highlightMesh = new THREE.Mesh(
-      new THREE.SphereGeometry(planet.radius * 1.04, 24, 24),
+      new THREE.SphereGeometry(planet.radius * 1.04, PLANET_SEGMENTS, PLANET_SEGMENTS),
       highlightMaterial
     );
     mesh.add(highlightMesh);
@@ -1102,7 +1156,7 @@ function buildScene() {
         depthWrite: false,
       });
       const cloudMesh = new THREE.Mesh(
-        new THREE.SphereGeometry(planet.radius * 1.04, 32, 32),
+        new THREE.SphereGeometry(planet.radius * 1.04, PLANET_SEGMENTS + 4, PLANET_SEGMENTS + 4),
         cloudMaterial
       );
       mesh.add(cloudMesh);
@@ -1116,7 +1170,7 @@ function buildScene() {
     if (planet.ring) {
       const ringInner = planet.radius + 2.0;
       const ringOuter = planet.radius + 3.8;
-      const ringGeometry = new THREE.RingGeometry(ringInner, ringOuter, 256, 1);
+      const ringGeometry = new THREE.RingGeometry(ringInner, ringOuter, RING_SEGMENTS, 1);
       const ringMaterial = new THREE.MeshBasicMaterial({
         color: 0xffffff,
         side: THREE.DoubleSide,
@@ -1159,7 +1213,7 @@ function buildScene() {
 
   satellites.forEach((satellite, index) => {
     const radius = satellite.radiusKm * SATELLITE_RADIUS_SCALE;
-    const geometry = new THREE.SphereGeometry(radius, 20, 20);
+    const geometry = new THREE.SphereGeometry(radius, PLANET_SEGMENTS, PLANET_SEGMENTS);
     const material = new THREE.MeshStandardMaterial({
       color: 0xd7d9e2,
       roughness: 0.7,
@@ -1188,7 +1242,7 @@ function buildScene() {
       depthWrite: false,
     });
     const highlightMesh = new THREE.Mesh(
-      new THREE.SphereGeometry(radius * 1.05, 20, 20),
+      new THREE.SphereGeometry(radius * 1.05, PLANET_SEGMENTS, PLANET_SEGMENTS),
       highlightMaterial
     );
     mesh.add(highlightMesh);
@@ -1203,7 +1257,7 @@ function buildScene() {
     });
   });
 
-  const moonGeometry = new THREE.SphereGeometry(MOON_RADIUS, 24, 24);
+  const moonGeometry = new THREE.SphereGeometry(MOON_RADIUS, MOON_SEGMENTS, MOON_SEGMENTS);
   const moonMaterial = new THREE.MeshStandardMaterial({
     color: 0xe6e1d8,
     roughness: 0.65,
