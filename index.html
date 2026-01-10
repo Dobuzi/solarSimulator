@@ -58,6 +58,10 @@
             <button class="mini-toggle" id="trailsMini" type="button" aria-pressed="false">
               Orbits
             </button>
+            <div class="mini-zoom" aria-label="Zoom">
+              <button type="button" id="cameraZoomOut" aria-label="Zoom out">-</button>
+              <button type="button" id="cameraZoomIn" aria-label="Zoom in">+</button>
+            </div>
             <span class="mini-credit">made by Dobuzi</span>
           </div>
           <div class="controls-content">
@@ -90,7 +94,6 @@
               <label>
                 Camera distance
                 <input id="cameraDistance" type="range" min="20" max="240" step="2" value="100" />
-                <span id="cameraValue">100</span>
               </label>
             </div>
             <div class="actions">

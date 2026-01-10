@@ -12,6 +12,8 @@ const pauseButton = document.getElementById("pause");
 const resetButton = document.getElementById("reset");
 const cameraDistance = document.getElementById("cameraDistance");
 const cameraValue = document.getElementById("cameraValue");
+const cameraZoomIn = document.getElementById("cameraZoomIn");
+const cameraZoomOut = document.getElementById("cameraZoomOut");
 const calendarDate = document.getElementById("calendarDate");
 const controlsPanel = document.getElementById("controlsPanel");
 const controlsToggle = document.getElementById("controlsToggle");
@@ -291,6 +293,10 @@ const state = {
     dragging: false,
     dragMode: "orbit",
     lastPointer: null,
+    pointers: new Map(),
+    pinchDistance: 0,
+    pinchCameraDistance: 0,
+    pinchMidpoint: null,
   },
 };
 
@@ -333,7 +339,6 @@ const planetTextureFiles = {
   Mercury: "mercury.jpg",
   Venus: "venus.jpg",
   Earth: "earth.jpg",
-  EarthClouds: "earth_clouds.jpg",
   Moon: "moon.jpg",
   Mars: "mars.jpg",
   Jupiter: "jupiter.jpg",
@@ -944,7 +949,6 @@ const satelliteMeshes = new Map();
 let moonMesh = null;
 let moonLabel = null;
 let moonHighlight = null;
-let earthCloudMesh = null;
 const highlightVertexShader = `
   varying vec3 vWorldPos;
   varying vec3 vWorldNormal;
@@ -1126,7 +1130,6 @@ function buildScene() {
   moonMesh = null;
   moonLabel = null;
   moonHighlight = null;
-  earthCloudMesh = null;
 
   planets.forEach((planet) => {
     const orbit = createOrbitLine(planet, 0, 0.2);
@@ -1187,23 +1190,6 @@ function buildScene() {
       });
     }
 
-    if (planet.name === "Earth") {
-      const cloudMaterial = new THREE.MeshStandardMaterial({
-        transparent: true,
-        opacity: 0.7,
-        depthWrite: false,
-      });
-      const cloudMesh = new THREE.Mesh(
-        new THREE.SphereGeometry(planet.radius * 1.04, PLANET_SEGMENTS + 4, PLANET_SEGMENTS + 4),
-        cloudMaterial
-      );
-      mesh.add(cloudMesh);
-      earthCloudMesh = cloudMesh;
-      loadPlanetTexture("EarthClouds", (texture) => {
-        cloudMaterial.map = texture;
-        cloudMaterial.needsUpdate = true;
-      });
-    }
 
     if (planet.ring) {
       const ringInner = planet.radius + 2.0;
@@ -1388,7 +1374,9 @@ function clampCameraDistance() {
 function updateCameraDistance(value) {
   state.camera.distance = Number(value);
   clampCameraDistance();
-  cameraValue.textContent = Math.round(state.camera.distance);
+  if (cameraValue) {
+    cameraValue.textContent = Math.round(state.camera.distance);
+  }
   cameraDistance.value = Math.round(state.camera.distance);
 }
 
@@ -1459,9 +1447,6 @@ function updatePlanetPositions(delta) {
     if (planet.rotationDays) {
       const rotation = (state.timeDays / planet.rotationDays) * Math.PI * 2;
       entry.mesh.rotation.y = rotation;
-    }
-    if (planet.name === "Earth" && earthCloudMesh) {
-      earthCloudMesh.rotation.y += 0.002;
     }
     const label = labelSprites.get(planet.name);
     if (label) {
@@ -1551,12 +1536,64 @@ function onClick(event) {
 }
 
 function onPointerDown(event) {
+  if (event.pointerType === "touch") {
+    event.preventDefault();
+  }
+  renderer.domElement.setPointerCapture(event.pointerId);
+  state.camera.pointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
+  if (event.pointerType === "touch") {
+    if (state.camera.pointers.size === 1) {
+      state.camera.dragging = true;
+      state.camera.lastPointer = { x: event.clientX, y: event.clientY };
+      state.camera.dragMode = "orbit";
+    } else if (state.camera.pointers.size === 2) {
+      const [a, b] = Array.from(state.camera.pointers.values());
+      const dx = a.x - b.x;
+      const dy = a.y - b.y;
+      state.camera.pinchDistance = Math.hypot(dx, dy);
+      state.camera.pinchCameraDistance = state.camera.distance;
+      state.camera.pinchMidpoint = { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 };
+      state.camera.dragging = false;
+      state.camera.lastPointer = null;
+    }
+    return;
+  }
   state.camera.dragging = true;
   state.camera.lastPointer = { x: event.clientX, y: event.clientY };
   state.camera.dragMode = event.button === 2 || event.shiftKey ? "pan" : "orbit";
 }
 
 function onPointerMove(event) {
+  if (event.pointerType === "touch") {
+    if (!state.camera.pointers.has(event.pointerId)) return;
+    event.preventDefault();
+    state.camera.pointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
+    if (state.camera.pointers.size >= 2) {
+      const [a, b] = Array.from(state.camera.pointers.values());
+      const dx = a.x - b.x;
+      const dy = a.y - b.y;
+      const currentDistance = Math.hypot(dx, dy);
+      if (state.camera.pinchDistance > 0) {
+        const scale = currentDistance / state.camera.pinchDistance;
+        updateCameraDistance(state.camera.pinchCameraDistance / scale);
+      }
+      const midpoint = { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 };
+      if (state.camera.pinchMidpoint) {
+        const midDx = midpoint.x - state.camera.pinchMidpoint.x;
+        const midDy = midpoint.y - state.camera.pinchMidpoint.y;
+        const direction = new THREE.Vector3();
+        camera.getWorldDirection(direction);
+        const right = new THREE.Vector3().crossVectors(direction, camera.up).normalize();
+        const up = new THREE.Vector3().copy(camera.up).normalize();
+        const panSpeed = state.camera.distance * 0.002;
+        state.camera.pan.addScaledVector(right, -midDx * panSpeed);
+        state.camera.pan.addScaledVector(up, midDy * panSpeed);
+      }
+      state.camera.pinchMidpoint = midpoint;
+      return;
+    }
+  }
+
   if (!state.camera.dragging || !state.camera.lastPointer) return;
   const dx = event.clientX - state.camera.lastPointer.x;
   const dy = event.clientY - state.camera.lastPointer.y;
@@ -1577,9 +1614,26 @@ function onPointerMove(event) {
   state.camera.lastPointer = { x: event.clientX, y: event.clientY };
 }
 
-function onPointerUp() {
+function onPointerUp(event) {
+  if (event && event.pointerType === "touch") {
+    event.preventDefault();
+  }
+  if (event) {
+    state.camera.pointers.delete(event.pointerId);
+  }
+  if (state.camera.pointers.size === 1) {
+    const [remaining] = Array.from(state.camera.pointers.values());
+    state.camera.dragging = true;
+    state.camera.lastPointer = { x: remaining.x, y: remaining.y };
+    state.camera.dragMode = "orbit";
+    state.camera.pinchDistance = 0;
+    state.camera.pinchMidpoint = null;
+    return;
+  }
   state.camera.dragging = false;
   state.camera.lastPointer = null;
+  state.camera.pinchDistance = 0;
+  state.camera.pinchMidpoint = null;
 }
 
 function onWheel(event) {
@@ -1684,6 +1738,16 @@ resetButton.addEventListener("click", () => {
 cameraDistance.addEventListener("input", (event) => {
   updateCameraDistance(event.target.value);
 });
+
+if (cameraZoomIn && cameraZoomOut) {
+  const step = 10;
+  cameraZoomIn.addEventListener("click", () => {
+    updateCameraDistance(state.camera.distance - step);
+  });
+  cameraZoomOut.addEventListener("click", () => {
+    updateCameraDistance(state.camera.distance + step);
+  });
+}
 
 if (calendarDate) {
   calendarDate.addEventListener("change", (event) => {
