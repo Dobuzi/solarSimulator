@@ -1,5 +1,7 @@
 # Solar Simulator
 
+<video controls src="assets/Solar%20System_Video.mov" width="100%"></video>
+
 A lightweight, offline-friendly 3D solar system simulator built with Three.js. It renders planetary orbits, rotation, lighting highlights, labels, and key controls in a single static page that works on desktop and mobile.
 
 ## Features
