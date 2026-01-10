@@ -23,18 +23,27 @@
             <h1>Solar System 3D</h1>
             <p class="lead">Rotate, pan, and zoom the live orbit map.</p>
           </div>
-          <div class="stats">
-            <div>
-              <span class="label">Focus</span>
-              <span class="value" id="focusName">Sun</span>
+          <div class="hero-meta">
+            <div class="stats">
+              <div>
+                <span class="label">Focus</span>
+                <span class="value" id="focusName">Sun</span>
+              </div>
+              <div>
+                <span class="label">Sim Time</span>
+                <span class="value" id="simTime">0 days</span>
+              </div>
+              <div>
+                <span class="label">FPS</span>
+                <span class="value" id="fps">--</span>
+              </div>
             </div>
-            <div>
-              <span class="label">Sim Time</span>
-              <span class="value" id="simTime">0 days</span>
-            </div>
-            <div>
-              <span class="label">FPS</span>
-              <span class="value" id="fps">--</span>
+            <div class="loading-indicator" id="loadingIndicator" aria-hidden="true">
+              <svg class="loading-ring" viewBox="0 0 36 36" aria-hidden="true">
+                <circle class="loading-ring__track" cx="18" cy="18" r="15.5" />
+                <circle class="loading-ring__progress" id="loadingProgress" cx="18" cy="18" r="15.5" />
+              </svg>
+              <span class="loading-label" id="loadingLabel">0%</span>
             </div>
           </div>
         </header>
@@ -94,13 +103,6 @@
             </div>
           </div>
         </aside>
-        <div class="loading-indicator" id="loadingIndicator" aria-hidden="true">
-          <svg class="loading-ring" viewBox="0 0 36 36" aria-hidden="true">
-            <circle class="loading-ring__track" cx="18" cy="18" r="15.5" />
-            <circle class="loading-ring__progress" id="loadingProgress" cx="18" cy="18" r="15.5" />
-          </svg>
-          <span class="loading-label" id="loadingLabel">0%</span>
-        </div>
       </main>
     </div>
 

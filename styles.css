@@ -89,6 +89,13 @@ h1 {
   min-width: 200px;
 }
 
+.hero-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 10px;
+}
+
 .stats .label {
   display: block;
   text-transform: uppercase;
@@ -309,11 +316,6 @@ h1 {
 }
 
 .loading-indicator {
-  position: absolute;
-  top: 106px;
-  right: 16px;
-  left: auto;
-  transform: none;
   display: flex;
   align-items: center;
   gap: 8px;
@@ -367,13 +369,6 @@ h1 {
 @media (max-width: 900px) {
   .controls {
     max-height: calc(100svh - 120px);
-  }
-}
-
-@media (max-width: 600px) {
-  .loading-indicator {
-    top: 120px;
-    right: 12px;
   }
 }
 
