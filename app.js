@@ -1498,7 +1498,7 @@ function updatePlanetPositions(delta) {
     entry.label.position.set(position.x + 0.8, position.y + 0.8, position.z);
   });
 
-  simTimeLabel.textContent = `${state.timeDays.toFixed(2)} days`;
+  simTimeLabel.textContent = `${Math.round(state.timeDays)} days`;
 }
 
 function updateTrails() {

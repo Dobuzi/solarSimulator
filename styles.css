@@ -309,10 +309,11 @@ h1 {
 }
 
 .loading-indicator {
-  position: fixed;
-  bottom: 16px;
-  left: 50%;
-  transform: translateX(-50%);
+  position: absolute;
+  top: 106px;
+  right: 16px;
+  left: auto;
+  transform: none;
   display: flex;
   align-items: center;
   gap: 8px;
@@ -366,6 +367,13 @@ h1 {
 @media (max-width: 900px) {
   .controls {
     max-height: calc(100svh - 120px);
+  }
+}
+
+@media (max-width: 600px) {
+  .loading-indicator {
+    top: 120px;
+    right: 12px;
   }
 }
 
