@@ -1,0 +1,8 @@
+{
+  "name": "solar-simulator",
+  "private": true,
+  "type": "commonjs",
+  "scripts": {
+    "test": "node --test"
+  }
+}

@@ -53,6 +53,7 @@ const SUN_SEGMENTS = isMobile ? 24 : 32;
 const RING_SEGMENTS = isMobile ? 160 : 256;
 const STAR_COUNT = isMobile ? 600 : 1200;
 const SATELLITE_RADIUS_SCALE = MOON_RADIUS / MOON_RADIUS_KM;
+const { computeHeliocentricPosition } = window.SimCore;
 
 const satellites = [
   { name: "Io", parent: "Jupiter", radiusKm: 1821.6, orbitKm: 421700, orbitDays: 1.769, tiltDeg: 0.04 },
@@ -976,72 +977,9 @@ const highlightFragmentShader = `
   }
 `;
 
-function normalizeRadians(angle) {
-  const twoPi = Math.PI * 2;
-  let result = angle % twoPi;
-  if (result > Math.PI) result -= twoPi;
-  if (result < -Math.PI) result += twoPi;
-  return result;
-}
-
-function solveKepler(M, e) {
-  let E = M;
-  for (let i = 0; i < 8; i += 1) {
-    const delta = (E - e * Math.sin(E) - M) / (1 - e * Math.cos(E));
-    E -= delta;
-    if (Math.abs(delta) < 1e-6) break;
-  }
-  return E;
-}
-
-function computeElements(planet, centuries) {
-  const base = planet.elements;
-  return {
-    a: base.a0 + base.aDot * centuries,
-    e: base.e0 + base.eDot * centuries,
-    I: (base.I0 + base.IDot * centuries) * DEG_TO_RAD,
-    L: (base.L0 + base.LDot * centuries) * DEG_TO_RAD,
-    peri: (base.peri0 + base.periDot * centuries) * DEG_TO_RAD,
-    node: (base.node0 + base.nodeDot * centuries) * DEG_TO_RAD,
-    b: (base.b || 0) * DEG_TO_RAD,
-    c: (base.c || 0) * DEG_TO_RAD,
-    s: (base.s || 0) * DEG_TO_RAD,
-    f: (base.f || 0) * DEG_TO_RAD,
-  };
-}
-
-function computeHeliocentricPosition(planet, timeDays) {
-  const centuries = timeDays / 36525;
-  const elements = computeElements(planet, centuries);
-  const omega = elements.peri - elements.node;
-  const meanAnomaly =
-    elements.L -
-    elements.peri +
-    elements.b * centuries * centuries +
-    elements.c * Math.cos(elements.f * centuries) +
-    elements.s * Math.sin(elements.f * centuries);
-  const M = normalizeRadians(meanAnomaly);
-  const E = solveKepler(M, elements.e);
-
-  const xPrime = elements.a * (Math.cos(E) - elements.e);
-  const yPrime = elements.a * Math.sqrt(1 - elements.e * elements.e) * Math.sin(E);
-
-  const cosO = Math.cos(elements.node);
-  const sinO = Math.sin(elements.node);
-  const cosI = Math.cos(elements.I);
-  const sinI = Math.sin(elements.I);
-  const cosW = Math.cos(omega);
-  const sinW = Math.sin(omega);
-
-  const xEcl = (cosW * cosO - sinW * sinO * cosI) * xPrime + (-sinW * cosO - cosW * sinO * cosI) * yPrime;
-  const yEcl = (cosW * sinO + sinW * cosO * cosI) * xPrime + (-sinW * sinO + cosW * cosO * cosI) * yPrime;
-  const zEcl = sinW * sinI * xPrime + cosW * sinI * yPrime;
-
-  return new THREE.Vector3(
-    xEcl * ORBIT_SCALE,
-    zEcl * ORBIT_SCALE * INCLINATION_SCALE,
-    yEcl * ORBIT_SCALE
-  );
+function getHeliocentricPosition(planet, timeDays) {
+  const position = computeHeliocentricPosition(planet, timeDays);
+  return new THREE.Vector3(position.x, position.y, position.z);
 }
 
 function createOrbitLine(planet, timeDays, opacity) {
@@ -1049,7 +987,7 @@ function createOrbitLine(planet, timeDays, opacity) {
   const segments = 180;
   for (let i = 0; i <= segments; i += 1) {
     const dayOffset = (planet.periodDays * i) / segments;
-    points.push(computeHeliocentricPosition(planet, timeDays + dayOffset));
+    points.push(getHeliocentricPosition(planet, timeDays + dayOffset));
   }
   const geometry = new THREE.BufferGeometry().setFromPoints(points);
   const material = new THREE.LineBasicMaterial({ color: 0xffffff, opacity, transparent: true });
@@ -1433,7 +1371,7 @@ function updatePlanetPositions(delta) {
   }
 
   planets.forEach((planet) => {
-    let position = computeHeliocentricPosition(planet, state.timeDays);
+    let position = getHeliocentricPosition(planet, state.timeDays);
     if (planet.name === "Earth") {
       position = position.clone().add(getEarthBarycenterOffset(state.timeDays));
     }
