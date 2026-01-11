@@ -164,12 +164,16 @@ h1 {
   color: #f4f6ff;
   border-radius: 12px;
   padding: 6px 12px;
-  font-size: 0.85rem;
+  font-size: clamp(0.82rem, 0.55vw, 0.95rem);
   cursor: pointer;
+  height: var(--mini-button-size);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .controls.is-collapsed {
-  width: auto;
+  width: min(100%, 520px);
   padding: 8px;
 }
 
@@ -184,7 +188,19 @@ h1 {
   display: flex;
   align-items: center;
   gap: 10px;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
+  --mini-button-size: clamp(44px, 2.8vw, 56px);
+  --mini-icon-size: clamp(36px, 2.2vw, 44px);
+  width: 100%;
+}
+
+.controls-mini > * {
+  flex: 0 0 auto;
+}
+
+.mini-spacer {
+  flex: 1 1 auto;
+  height: var(--mini-button-size);
 }
 
 .mini-credit {
@@ -195,15 +211,52 @@ h1 {
   color: rgba(244, 246, 255, 0.6);
 }
 
+.corner-credit {
+  position: absolute;
+  right: 16px;
+  bottom: 16px;
+  padding: 6px 10px;
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(244, 246, 255, 0.6);
+  text-decoration: none;
+  z-index: 3;
+}
+
+.corner-credit:hover {
+  color: rgba(255, 255, 255, 0.9);
+}
+
 .mini-toggle {
   border: 1px solid rgba(255, 255, 255, 0.22);
   background: rgba(255, 255, 255, 0.08);
   color: rgba(244, 246, 255, 0.85);
   border-radius: 999px;
   padding: 4px 10px;
-  font-size: 0.78rem;
+  font-size: clamp(0.76rem, 0.5vw, 0.9rem);
+  height: var(--mini-button-size);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   cursor: pointer;
   transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+.mini-icon {
+  width: var(--mini-button-size);
+  height: var(--mini-button-size);
+  min-width: var(--mini-button-size);
+  min-height: var(--mini-button-size);
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mini-icon svg {
+  width: var(--mini-icon-size);
+  height: var(--mini-icon-size);
 }
 
 .mini-toggle.is-active {
@@ -214,6 +267,13 @@ h1 {
 
 .controls.is-collapsed .controls-mini {
   gap: 8px;
+}
+
+.mini-reset {
+  background: rgba(255, 220, 150, 0.14);
+  border-color: rgba(255, 220, 150, 0.6);
+  color: rgba(255, 244, 220, 0.95);
+  box-shadow: 0 0 0 1px rgba(255, 220, 150, 0.4);
 }
 
 .controls.is-collapsed .mini-toggle {
@@ -289,28 +349,6 @@ h1 {
   background: rgba(255, 255, 255, 0.92);
   border: 1px solid rgba(255, 255, 255, 0.3);
   box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
-}
-
-.mini-zoom {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.mini-zoom button {
-  width: 28px;
-  height: 28px;
-  padding: 0;
-  border-radius: 50%;
-  border: 1px solid rgba(255, 255, 255, 0.22);
-  background: rgba(255, 255, 255, 0.08);
-  color: rgba(244, 246, 255, 0.85);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1rem;
-  font-weight: 600;
-  cursor: pointer;
 }
 
 
@@ -471,9 +509,18 @@ h1 {
     left: 12px;
     top: auto;
     bottom: 12px;
-    width: auto;
+    width: calc(100% - 24px);
     padding: 12px;
     max-height: 45svh;
+  }
+
+  .controls.is-collapsed {
+    width: calc(100% - 24px);
+  }
+
+  .corner-credit {
+    right: 24px;
+    bottom: 84px;
   }
 
   .controls-grid {
@@ -488,8 +535,9 @@ h1 {
     flex-direction: column;
   }
 
-  .mini-zoom button {
-    width: 36px;
-    height: 36px;
+  .controls-mini {
+    --mini-button-size: 56px;
+    --mini-icon-size: 40px;
   }
+
 }

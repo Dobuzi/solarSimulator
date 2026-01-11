@@ -49,8 +49,13 @@
         </header>
         <aside class="controls is-collapsed" id="controlsPanel">
           <div class="controls-mini">
-            <button class="controls-toggle" id="controlsToggle" type="button">
-              Controls
+            <button class="controls-toggle mini-icon" id="controlsToggle" type="button" aria-label="Settings">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path
+                  d="M19.14 12.94c.04-.3.06-.6.06-.94s-.02-.64-.07-.94l2.03-1.58a.5.5 0 0 0 .12-.65l-1.92-3.32a.5.5 0 0 0-.6-.22l-2.39.96a7.03 7.03 0 0 0-1.63-.94l-.36-2.54a.5.5 0 0 0-.5-.42h-3.84a.5.5 0 0 0-.5.42l-.36 2.54c-.58.22-1.12.52-1.63.94l-2.39-.96a.5.5 0 0 0-.6.22L2.6 8.83a.5.5 0 0 0 .12.65l2.03 1.58c-.05.3-.07.62-.07.94s.02.64.07.94l-2.03 1.58a.5.5 0 0 0-.12.65l1.92 3.32c.13.22.39.31.6.22l2.39-.96c.5.41 1.05.73 1.63.94l.36 2.54c.05.24.26.42.5.42h3.84c.24 0 .45-.18.5-.42l.36-2.54c.58-.22 1.12-.52 1.63-.94l2.39.96c.22.09.48 0 .6-.22l1.92-3.32a.5.5 0 0 0-.12-.65l-2.03-1.58ZM12 15.5A3.5 3.5 0 1 1 12 8a3.5 3.5 0 0 1 0 7.5Z"
+                  fill="currentColor"
+                />
+              </svg>
             </button>
             <button class="mini-toggle" id="labelsMini" type="button" aria-pressed="true">
               Labels
@@ -58,13 +63,15 @@
             <button class="mini-toggle" id="trailsMini" type="button" aria-pressed="false">
               Orbits
             </button>
-            <div class="mini-zoom" aria-label="Zoom">
-              <button type="button" id="cameraZoomOut" aria-label="Zoom out">-</button>
-              <button type="button" id="cameraZoomIn" aria-label="Zoom in">+</button>
-            </div>
-            <a class="mini-credit" href="https://github.com/Dobuzi/solarSimulator" target="_blank" rel="noopener">
-              made by Dobuzi
-            </a>
+            <span class="mini-spacer" aria-hidden="true"></span>
+            <button class="mini-toggle mini-icon mini-reset" id="resetMini" type="button" aria-label="Reset view">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path
+                  d="M12 6V3L8 7l4 4V8c2.76 0 5 2.24 5 5a5 5 0 1 1-9.9-1h-2.02A7 7 0 1 0 12 6Z"
+                  fill="currentColor"
+                />
+              </svg>
+            </button>
           </div>
           <div class="controls-content">
             <div class="controls-grid">
@@ -108,6 +115,9 @@
             </div>
           </div>
         </aside>
+        <a class="corner-credit" href="https://github.com/Dobuzi/solarSimulator" target="_blank" rel="noopener">
+          made by Dobuzi
+        </a>
       </main>
     </div>
 
