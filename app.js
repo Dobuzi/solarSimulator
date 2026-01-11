@@ -10,10 +10,9 @@ const trailsMini = document.getElementById("trailsMini");
 const focusSelect = document.getElementById("focus");
 const pauseButton = document.getElementById("pause");
 const resetButton = document.getElementById("reset");
+const resetMini = document.getElementById("resetMini");
 const cameraDistance = document.getElementById("cameraDistance");
 const cameraValue = document.getElementById("cameraValue");
-const cameraZoomIn = document.getElementById("cameraZoomIn");
-const cameraZoomOut = document.getElementById("cameraZoomOut");
 const calendarDate = document.getElementById("calendarDate");
 const controlsPanel = document.getElementById("controlsPanel");
 const controlsToggle = document.getElementById("controlsToggle");
@@ -286,7 +285,7 @@ const state = {
     yaw: 0.85,
     pitch: 0.45,
     distance: Number(cameraDistance.value),
-    minDistance: 12,
+    minDistance: 2,
     maxDistance: 260,
     target: new THREE.Vector3(0, 0, 0),
     pan: new THREE.Vector3(0, 0, 0),
@@ -1711,6 +1710,7 @@ if (labelsMini) {
 }
 
 if (trailsMini) {
+  trailsMini.classList.add("is-active");
   trailsMini.addEventListener("click", () => {
     trailsMini.classList.toggle("is-active");
     updateTrailsVisibility();
@@ -1727,27 +1727,28 @@ pauseButton.addEventListener("click", () => {
   pauseButton.textContent = state.paused ? "Resume" : "Pause";
 });
 
-resetButton.addEventListener("click", () => {
+function resetView() {
   setFocus("Sun");
   state.timeDays = 0;
   state.camera.pan.set(0, 0, 0);
   applyViewPreset("iso");
   updateCameraDistance(100);
+}
+
+resetButton.addEventListener("click", () => {
+  resetView();
 });
+
+if (resetMini) {
+  resetMini.addEventListener("click", () => {
+    resetView();
+  });
+}
 
 cameraDistance.addEventListener("input", (event) => {
   updateCameraDistance(event.target.value);
 });
 
-if (cameraZoomIn && cameraZoomOut) {
-  const step = 10;
-  cameraZoomIn.addEventListener("click", () => {
-    updateCameraDistance(state.camera.distance - step);
-  });
-  cameraZoomOut.addEventListener("click", () => {
-    updateCameraDistance(state.camera.distance + step);
-  });
-}
 
 if (calendarDate) {
   calendarDate.addEventListener("change", (event) => {
