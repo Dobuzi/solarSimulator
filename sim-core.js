@@ -1,8 +1,8 @@
 (function (root, factory) {
+  const core = factory();
+  root.SimCore = core;
   if (typeof module === "object" && module.exports) {
-    module.exports = factory();
-  } else {
-    root.SimCore = factory();
+    module.exports = core;
   }
 })(typeof self !== "undefined" ? self : this, function () {
   const ORBIT_SCALE = 9.5;
@@ -77,6 +77,13 @@
     };
   }
 
+  function computeMinCameraDistance(radius, vFovRad, aspect, fillRatio) {
+    const safeAspect = aspect || 1;
+    const safeFill = Math.max(0.1, Math.min(1, fillRatio || 0.8));
+    const hFov = 2 * Math.atan(Math.tan(vFovRad / 2) * safeAspect);
+    return radius / ((safeFill / 2) * Math.tan(hFov / 2));
+  }
+
   return {
     ORBIT_SCALE,
     DEG_TO_RAD,
@@ -85,5 +92,6 @@
     solveKepler,
     computeElements,
     computeHeliocentricPosition,
+    computeMinCameraDistance,
   };
 });
