@@ -85,3 +85,12 @@ test("computeMinCameraDistance matches 20% width target", () => {
   const distance = SimCore.computeMinCameraDistance(1, vFov, 1, 0.2);
   assert.ok(Math.abs(distance - 10) < 1e-10);
 });
+
+test("computeOrbitOpacity ramps between bounds", () => {
+  const near = SimCore.computeOrbitOpacity(40, 40, 260, 0.2, 0.55);
+  const mid = SimCore.computeOrbitOpacity(150, 40, 260, 0.2, 0.55);
+  const far = SimCore.computeOrbitOpacity(260, 40, 260, 0.2, 0.55);
+  assert.ok(Math.abs(near - 0.2) < 1e-10);
+  assert.ok(mid > near && mid < far);
+  assert.ok(Math.abs(far - 0.55) < 1e-10);
+});

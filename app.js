@@ -129,10 +129,18 @@ if (!window.SimCore) {
       const hFov = 2 * Math.atan(Math.tan(vFovRad / 2) * safeAspect);
       return radius / ((safeFill / 2) * Math.tan(hFov / 2));
     },
+    computeOrbitOpacity(distance, nearDist, farDist, baseOpacity, maxOpacity) {
+      const safeNear = Math.max(1, nearDist || 1);
+      const safeFar = Math.max(safeNear + 1, farDist || safeNear + 1);
+      const minOpacity = Math.max(0, Math.min(1, baseOpacity || 0));
+      const maxSafe = Math.max(minOpacity, Math.min(1, maxOpacity || minOpacity));
+      const t = Math.max(0, Math.min(1, (distance - safeNear) / (safeFar - safeNear)));
+      return minOpacity + (maxSafe - minOpacity) * t;
+    },
   };
 }
 
-const { computeHeliocentricPosition, computeMinCameraDistance } = window.SimCore;
+const { computeHeliocentricPosition, computeMinCameraDistance, computeOrbitOpacity } = window.SimCore;
 
 const satellites = [
   { name: "Io", parent: "Jupiter", radiusKm: 1821.6, orbitKm: 421700, orbitDays: 1.769, tiltDeg: 0.04 },
@@ -1070,7 +1078,9 @@ function createOrbitLine(planet, timeDays, opacity) {
   }
   const geometry = new THREE.BufferGeometry().setFromPoints(points);
   const material = new THREE.LineBasicMaterial({ color: 0xffffff, opacity, transparent: true });
-  return new THREE.LineLoop(geometry, material);
+  const line = new THREE.LineLoop(geometry, material);
+  line.renderOrder = 2;
+  return line;
 }
 
 function getEarthBarycenterOffset(timeDays) {
@@ -1122,9 +1132,15 @@ function createLabelSprite(text) {
 
   const texture = new THREE.CanvasTexture(canvas);
   texture.needsUpdate = true;
-  const material = new THREE.SpriteMaterial({ map: texture, transparent: true });
+  const material = new THREE.SpriteMaterial({
+    map: texture,
+    transparent: true,
+    depthTest: false,
+    depthWrite: false,
+  });
   const sprite = new THREE.Sprite(material);
   sprite.scale.set(8, 8, 1);
+  sprite.renderOrder = 1;
   return sprite;
 }
 
@@ -1454,6 +1470,17 @@ function updateCameraPosition() {
 
   camera.position.set(x, y, z);
   camera.lookAt(state.camera.target);
+  updateOrbitOpacity();
+}
+
+function updateOrbitOpacity() {
+  if (!orbitGroup.visible) return;
+  const opacity = computeOrbitOpacity(state.camera.distance, 40, 260, 0.2, 0.55);
+  orbitGroup.children.forEach((line) => {
+    if (line.material && line.material.opacity !== undefined) {
+      line.material.opacity = opacity;
+    }
+  });
 }
 
 function getDistanceScale(distance) {

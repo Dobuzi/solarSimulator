@@ -84,6 +84,15 @@
     return radius / ((safeFill / 2) * Math.tan(hFov / 2));
   }
 
+  function computeOrbitOpacity(distance, nearDist, farDist, baseOpacity, maxOpacity) {
+    const safeNear = Math.max(1, nearDist || 1);
+    const safeFar = Math.max(safeNear + 1, farDist || safeNear + 1);
+    const minOpacity = Math.max(0, Math.min(1, baseOpacity || 0));
+    const maxSafe = Math.max(minOpacity, Math.min(1, maxOpacity || minOpacity));
+    const t = Math.max(0, Math.min(1, (distance - safeNear) / (safeFar - safeNear)));
+    return minOpacity + (maxSafe - minOpacity) * t;
+  }
+
   return {
     ORBIT_SCALE,
     DEG_TO_RAD,
@@ -93,5 +102,6 @@
     computeElements,
     computeHeliocentricPosition,
     computeMinCameraDistance,
+    computeOrbitOpacity,
   };
 });
