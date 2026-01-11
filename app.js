@@ -53,7 +53,7 @@ const SUN_SEGMENTS = isMobile ? 24 : 32;
 const RING_SEGMENTS = isMobile ? 160 : 256;
 const STAR_COUNT = isMobile ? 600 : 1200;
 const SATELLITE_RADIUS_SCALE = MOON_RADIUS / MOON_RADIUS_KM;
-const { computeHeliocentricPosition } = window.SimCore;
+const { computeHeliocentricPosition, computeMinCameraDistance } = window.SimCore;
 
 const satellites = [
   { name: "Io", parent: "Jupiter", radiusKm: 1821.6, orbitKm: 421700, orbitDays: 1.769, tiltDeg: 0.04 },
@@ -1280,12 +1280,30 @@ function updateScale() {
   trailGroup.scale.set(scale, scale, scale);
 }
 
+function getFocusRadius(name) {
+  if (name === "Sun") return SUN_RADIUS;
+  if (name === "Moon") return MOON_RADIUS;
+  return planetRadiusByName.get(name) || 1;
+}
+
+function updateMinCameraDistance() {
+  const radius = getFocusRadius(state.focus);
+  const vFov = camera.fov * DEG_TO_RAD;
+  const desiredDistance = computeMinCameraDistance(radius, vFov, camera.aspect || 1, 1);
+  const minDistance = Math.max(1, desiredDistance);
+  state.camera.minDistance = minDistance;
+  cameraDistance.min = minDistance.toFixed(1);
+  clampCameraDistance();
+  cameraDistance.value = Math.round(state.camera.distance);
+}
+
 function setFocus(name) {
   state.focus = name;
   focusName.textContent = name;
   focusSelect.value = name;
   state.camera.pan.set(0, 0, 0);
   applyViewPreset("iso");
+  updateMinCameraDistance();
 }
 
 function setSpeed(value) {
@@ -1443,6 +1461,7 @@ function resize() {
   renderer.setSize(width, height);
   camera.aspect = width / height;
   camera.updateProjectionMatrix();
+  updateMinCameraDistance();
 }
 
 const raycaster = new THREE.Raycaster();
@@ -1622,7 +1641,7 @@ function init() {
   updateScale();
 
   resize();
-  updateCameraDistance(cameraDistance.value);
+  resetView();
   if (calendarDate) {
     const today = new Date();
     const iso = today.toISOString().slice(0, 10);
@@ -1670,7 +1689,10 @@ function resetView() {
   state.timeDays = 0;
   state.camera.pan.set(0, 0, 0);
   applyViewPreset("iso");
-  updateCameraDistance(100);
+  const radius = getFocusRadius(state.focus);
+  const vFov = camera.fov * DEG_TO_RAD;
+  const targetDistance = computeMinCameraDistance(radius, vFov, camera.aspect || 1, 0.2);
+  updateCameraDistance(targetDistance);
 }
 
 resetButton.addEventListener("click", () => {

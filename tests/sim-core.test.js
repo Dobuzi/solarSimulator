@@ -73,3 +73,15 @@ test("computeHeliocentricPosition returns scaled vector for circular orbit", () 
   assert.ok(Math.abs(position.y) < 1e-10);
   assert.ok(Math.abs(position.z) < 1e-10);
 });
+
+test("computeMinCameraDistance matches 100% width target", () => {
+  const vFov = Math.PI / 2;
+  const distance = SimCore.computeMinCameraDistance(1, vFov, 1, 1);
+  assert.ok(Math.abs(distance - 2) < 1e-10);
+});
+
+test("computeMinCameraDistance matches 20% width target", () => {
+  const vFov = Math.PI / 2;
+  const distance = SimCore.computeMinCameraDistance(1, vFov, 1, 0.2);
+  assert.ok(Math.abs(distance - 10) < 1e-10);
+});
