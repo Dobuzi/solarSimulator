@@ -2,7 +2,8 @@
 
 ## Live Demo
 - https://dobuzi.github.io/solarSimulator/
-- [Demo video](assets/Solar%20System_Video.mov)
+- ![Demo preview](assets/demo.gif)
+- [Full video](assets/Solar%20System_Video.mov)
 
 A lightweight, offline-friendly 3D solar system simulator built with Three.js. It renders planetary orbits, rotation, lighting highlights, labels, and key controls in a single static page that works on desktop and mobile.
 
