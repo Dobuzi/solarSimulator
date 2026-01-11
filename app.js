@@ -137,10 +137,37 @@ if (!window.SimCore) {
       const t = Math.max(0, Math.min(1, (distance - safeNear) / (safeFar - safeNear)));
       return minOpacity + (maxSafe - minOpacity) * t;
     },
+    mixColor(hexA, hexB, ratio) {
+      const safeRatio = Math.max(0, Math.min(1, ratio || 0));
+      const a = hexA >>> 0;
+      const b = hexB >>> 0;
+      const ar = (a >> 16) & 0xff;
+      const ag = (a >> 8) & 0xff;
+      const ab = a & 0xff;
+      const br = (b >> 16) & 0xff;
+      const bg = (b >> 8) & 0xff;
+      const bb = b & 0xff;
+      const rr = Math.round(ar + (br - ar) * safeRatio);
+      const rg = Math.round(ag + (bg - ag) * safeRatio);
+      const rb = Math.round(ab + (bb - ab) * safeRatio);
+      return (rr << 16) | (rg << 8) | rb;
+    },
+    computeOrbitColor(baseColor) {
+      const base = baseColor >>> 0;
+      const br = (base >> 16) & 0xff;
+      const bg = (base >> 8) & 0xff;
+      const bb = base & 0xff;
+      const boost = (channel) => Math.min(255, Math.round(channel * 1.35 + 50));
+      const boosted =
+        (boost(br) << 16) |
+        (boost(bg) << 8) |
+        boost(bb);
+      return window.SimCore.mixColor(base, boosted, 0.7);
+    },
   };
 }
 
-const { computeHeliocentricPosition, computeMinCameraDistance, computeOrbitOpacity } = window.SimCore;
+const { computeHeliocentricPosition, computeMinCameraDistance, computeOrbitOpacity, mixColor } = window.SimCore;
 
 const satellites = [
   { name: "Io", parent: "Jupiter", radiusKm: 1821.6, orbitKm: 421700, orbitDays: 1.769, tiltDeg: 0.04 },
@@ -411,7 +438,7 @@ if (renderer.outputColorSpace !== undefined) {
 sceneElement.appendChild(renderer.domElement);
 
 const scene = new THREE.Scene();
-scene.fog = new THREE.Fog(0x05040b, 30, 160);
+scene.fog = new THREE.Fog(0x05040b, 30, 220);
 
 const camera = new THREE.PerspectiveCamera(50, 1, 0.1, 500);
 
@@ -1077,7 +1104,13 @@ function createOrbitLine(planet, timeDays, opacity) {
     points.push(getHeliocentricPosition(planet, timeDays + dayOffset));
   }
   const geometry = new THREE.BufferGeometry().setFromPoints(points);
-  const material = new THREE.LineBasicMaterial({ color: 0xffffff, opacity, transparent: true });
+  const orbitColor = 0xffffff;
+  const material = new THREE.LineBasicMaterial({
+    color: orbitColor,
+    opacity,
+    transparent: true,
+    depthWrite: false,
+  });
   const line = new THREE.LineLoop(geometry, material);
   line.renderOrder = 2;
   return line;
@@ -1475,7 +1508,7 @@ function updateCameraPosition() {
 
 function updateOrbitOpacity() {
   if (!orbitGroup.visible) return;
-  const opacity = computeOrbitOpacity(state.camera.distance, 40, 260, 0.2, 0.55);
+  const opacity = computeOrbitOpacity(state.camera.distance, 40, 260, 0.35, 0.85);
   orbitGroup.children.forEach((line) => {
     if (line.material && line.material.opacity !== undefined) {
       line.material.opacity = opacity;

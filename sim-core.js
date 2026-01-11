@@ -93,6 +93,35 @@
     return minOpacity + (maxSafe - minOpacity) * t;
   }
 
+  function mixColor(hexA, hexB, ratio) {
+    const safeRatio = Math.max(0, Math.min(1, ratio || 0));
+    const a = hexA >>> 0;
+    const b = hexB >>> 0;
+    const ar = (a >> 16) & 0xff;
+    const ag = (a >> 8) & 0xff;
+    const ab = a & 0xff;
+    const br = (b >> 16) & 0xff;
+    const bg = (b >> 8) & 0xff;
+    const bb = b & 0xff;
+    const rr = Math.round(ar + (br - ar) * safeRatio);
+    const rg = Math.round(ag + (bg - ag) * safeRatio);
+    const rb = Math.round(ab + (bb - ab) * safeRatio);
+    return (rr << 16) | (rg << 8) | rb;
+  }
+
+  function computeOrbitColor(baseColor) {
+    const base = baseColor >>> 0;
+    const br = (base >> 16) & 0xff;
+    const bg = (base >> 8) & 0xff;
+    const bb = base & 0xff;
+    const boost = (channel) => Math.min(255, Math.round(channel * 1.35 + 50));
+    const boosted =
+      (boost(br) << 16) |
+      (boost(bg) << 8) |
+      boost(bb);
+    return mixColor(base, boosted, 0.7);
+  }
+
   return {
     ORBIT_SCALE,
     DEG_TO_RAD,
@@ -103,5 +132,7 @@
     computeHeliocentricPosition,
     computeMinCameraDistance,
     computeOrbitOpacity,
+    mixColor,
+    computeOrbitColor,
   };
 });

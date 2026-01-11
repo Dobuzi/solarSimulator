@@ -94,3 +94,9 @@ test("computeOrbitOpacity ramps between bounds", () => {
   assert.ok(mid > near && mid < far);
   assert.ok(Math.abs(far - 0.55) < 1e-10);
 });
+
+test("mixColor blends toward white", () => {
+  const red = 0xff0000;
+  const mixed = SimCore.mixColor(red, 0xffffff, 0.5);
+  assert.equal(mixed, 0xff8080);
+});
