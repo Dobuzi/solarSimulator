@@ -16,6 +16,7 @@ const cameraValue = document.getElementById("cameraValue");
 const calendarDate = document.getElementById("calendarDate");
 const controlsPanel = document.getElementById("controlsPanel");
 const controlsToggle = document.getElementById("controlsToggle");
+const langToggle = document.getElementById("langToggle");
 const loadingIndicator = document.getElementById("loadingIndicator");
 const loadingProgress = document.getElementById("loadingProgress");
 const loadingLabel = document.getElementById("loadingLabel");
@@ -26,6 +27,53 @@ const fpsLabel = document.getElementById("fps");
 
 if (!THREE) {
   throw new Error("THREE is not available. Ensure vendor/three/three.min.js is loaded.");
+}
+
+const I18n = window.I18n || {
+  detectLanguage: () => "en",
+  t: (key) => key,
+  tPlanet: (name) => name,
+};
+
+let currentLang = "en";
+
+function detectLanguage() {
+  const stored = localStorage.getItem("lang");
+  if (stored) return stored;
+  return I18n.detectLanguage(navigator.language || "");
+}
+
+function t(key) {
+  return I18n.t(key, currentLang);
+}
+
+function tPlanet(name) {
+  return I18n.tPlanet(name, currentLang);
+}
+
+function applyTranslations() {
+  const englishOnly = new Set(["focusLabel", "simTimeLabel"]);
+  document.querySelectorAll("[data-i18n]").forEach((node) => {
+    const key = node.dataset.i18n;
+    node.textContent = englishOnly.has(key) ? I18n.t(key, "en") : t(key);
+  });
+  document.querySelectorAll("[data-i18n-aria]").forEach((node) => {
+    const key = node.dataset.i18nAria;
+    node.setAttribute("aria-label", t(key));
+  });
+  if (langToggle) {
+    langToggle.textContent = currentLang === "ko" ? "KR" : "EN";
+  }
+  updateFocusLabel();
+  updatePlanetLabelTexts();
+  populateFocus();
+  pauseButton.textContent = state && state.paused ? t("resume") : t("pause");
+  simTimeLabel.textContent = `${Math.round(state.timeDays)} ${t("daysUnit")}`;
+  if (state && state.fps.value) {
+    fpsLabel.textContent = `${state.fps.value.toFixed(0)} ${t("fpsUnit")}`;
+  } else {
+    fpsLabel.textContent = "--";
+  }
 }
 
 const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
@@ -1408,6 +1456,39 @@ function updateScale() {
   trailGroup.scale.set(scale, scale, scale);
 }
 
+function updateLabelSpriteText(sprite, text) {
+  if (!sprite || !sprite.material) return;
+  const canvas = document.createElement("canvas");
+  const size = 256;
+  canvas.width = size;
+  canvas.height = size;
+  const context = canvas.getContext("2d");
+  context.clearRect(0, 0, size, size);
+  context.fillStyle = "rgba(255,255,255,0.9)";
+  context.font = "36px Space Grotesk";
+  context.textAlign = "center";
+  context.textBaseline = "middle";
+  context.fillText(text, size / 2, size / 2);
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.needsUpdate = true;
+  sprite.material.map = texture;
+  sprite.material.needsUpdate = true;
+}
+
+function updatePlanetLabelTexts() {
+  labelSprites.forEach((sprite, name) => {
+    updateLabelSpriteText(sprite, tPlanet(name));
+  });
+  if (moonLabel) {
+    updateLabelSpriteText(moonLabel, tPlanet("Moon"));
+  }
+}
+
+function updateFocusLabel() {
+  if (!focusName) return;
+  focusName.textContent = tPlanet(state.focus);
+}
+
 function getFocusRadius(name) {
   if (name === "Sun") return SUN_RADIUS;
   if (name === "Moon") return MOON_RADIUS;
@@ -1427,7 +1508,7 @@ function updateMinCameraDistance() {
 
 function setFocus(name) {
   state.focus = name;
-  focusName.textContent = name;
+  updateFocusLabel();
   focusSelect.value = name;
   state.camera.pan.set(0, 0, 0);
   applyViewPreset("iso");
@@ -1577,7 +1658,7 @@ function updatePlanetPositions(delta) {
     entry.label.position.set(position.x + 0.8, position.y + 0.8, position.z);
   });
 
-  simTimeLabel.textContent = `${Math.round(state.timeDays)} days`;
+  simTimeLabel.textContent = `${Math.round(state.timeDays)} ${t("daysUnit")}`;
 }
 
 function updateTrails() {
@@ -1592,7 +1673,8 @@ function updateFps(timestamp) {
     state.fps.frames.shift();
   }
   const avg = state.fps.frames.reduce((sum, value) => sum + value, 0) / state.fps.frames.length;
-  fpsLabel.textContent = `${avg.toFixed(0)} fps`;
+  state.fps.value = avg;
+  fpsLabel.textContent = `${avg.toFixed(0)} ${t("fpsUnit")}`;
 }
 
 function resize() {
@@ -1757,18 +1839,19 @@ function populateFocus() {
   focusSelect.innerHTML = "";
   const sunOption = document.createElement("option");
   sunOption.value = "Sun";
-  sunOption.textContent = "Sun";
+  sunOption.textContent = tPlanet("Sun");
   focusSelect.appendChild(sunOption);
   planets.forEach((planet) => {
     const option = document.createElement("option");
     option.value = planet.name;
-    option.textContent = planet.name;
+    option.textContent = tPlanet(planet.name);
     focusSelect.appendChild(option);
   });
   const moonOption = document.createElement("option");
   moonOption.value = "Moon";
-  moonOption.textContent = "Moon";
+  moonOption.textContent = tPlanet("Moon");
   focusSelect.appendChild(moonOption);
+  focusSelect.value = state.focus;
 }
 
 function init() {
@@ -1820,7 +1903,7 @@ focusSelect.addEventListener("change", (event) => {
 
 pauseButton.addEventListener("click", () => {
   state.paused = !state.paused;
-  pauseButton.textContent = state.paused ? "Resume" : "Pause";
+  pauseButton.textContent = state.paused ? t("resume") : t("pause");
 });
 
 function resetView() {
@@ -1852,6 +1935,14 @@ cameraDistance.addEventListener("input", (event) => {
 if (calendarDate) {
   calendarDate.addEventListener("change", (event) => {
     setTimeFromDateInput(event.target.value);
+  });
+}
+
+if (langToggle) {
+  langToggle.addEventListener("click", () => {
+    currentLang = currentLang === "ko" ? "en" : "ko";
+    localStorage.setItem("lang", currentLang);
+    applyTranslations();
   });
 }
 
@@ -1888,4 +1979,6 @@ updateLabelsVisibility();
 updateTrailsVisibility();
 init();
 applyViewPreset("iso");
+currentLang = detectLanguage();
+applyTranslations();
 requestAnimationFrame(animate);

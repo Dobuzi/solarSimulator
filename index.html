@@ -19,22 +19,22 @@
         <div id="scene" class="scene"></div>
         <header class="hero">
           <div>
-            <p class="eyebrow">Orbital Sandbox</p>
-            <h1>Solar System 3D</h1>
-            <p class="lead">Rotate, pan, and zoom the live orbit map.</p>
+            <p class="eyebrow" data-i18n="eyebrow">Orbital Sandbox</p>
+            <h1 data-i18n="title">Solar System 3D</h1>
+            <p class="lead" data-i18n="lead">Rotate, pan, and zoom the live orbit map.</p>
           </div>
           <div class="hero-meta">
             <div class="stats">
               <div>
-                <span class="label">Focus</span>
+                <span class="label" data-i18n="focusLabel">Focus</span>
                 <span class="value" id="focusName">Sun</span>
               </div>
               <div>
-                <span class="label">Sim Time</span>
+                <span class="label" data-i18n="simTimeLabel">Sim Time</span>
                 <span class="value" id="simTime">0 days</span>
               </div>
               <div>
-                <span class="label">FPS</span>
+                <span class="label" data-i18n="fpsLabel">FPS</span>
                 <span class="value" id="fps">--</span>
               </div>
             </div>
@@ -49,7 +49,13 @@
         </header>
         <aside class="controls is-collapsed" id="controlsPanel">
           <div class="controls-mini">
-            <button class="controls-toggle mini-icon" id="controlsToggle" type="button" aria-label="Settings">
+            <button
+              class="controls-toggle mini-icon"
+              id="controlsToggle"
+              type="button"
+              aria-label="Settings"
+              data-i18n-aria="settingsLabel"
+            >
               <svg viewBox="0 0 24 24" aria-hidden="true">
                 <path
                   d="M19.14 12.94c.04-.3.06-.6.06-.94s-.02-.64-.07-.94l2.03-1.58a.5.5 0 0 0 .12-.65l-1.92-3.32a.5.5 0 0 0-.6-.22l-2.39.96a7.03 7.03 0 0 0-1.63-.94l-.36-2.54a.5.5 0 0 0-.5-.42h-3.84a.5.5 0 0 0-.5.42l-.36 2.54c-.58.22-1.12.52-1.63.94l-2.39-.96a.5.5 0 0 0-.6.22L2.6 8.83a.5.5 0 0 0 .12.65l2.03 1.58c-.05.3-.07.62-.07.94s.02.64.07.94l-2.03 1.58a.5.5 0 0 0-.12.65l1.92 3.32c.13.22.39.31.6.22l2.39-.96c.5.41 1.05.73 1.63.94l.36 2.54c.05.24.26.42.5.42h3.84c.24 0 .45-.18.5-.42l.36-2.54c.58-.22 1.12-.52 1.63-.94l2.39.96c.22.09.48 0 .6-.22l1.92-3.32a.5.5 0 0 0-.12-.65l-2.03-1.58ZM12 15.5A3.5 3.5 0 1 1 12 8a3.5 3.5 0 0 1 0 7.5Z"
@@ -57,14 +63,23 @@
                 />
               </svg>
             </button>
-            <button class="mini-toggle" id="labelsMini" type="button" aria-pressed="true">
+            <button class="mini-toggle" id="labelsMini" type="button" aria-pressed="true" data-i18n="labelsToggle">
               Labels
             </button>
-            <button class="mini-toggle" id="trailsMini" type="button" aria-pressed="false">
+            <button class="mini-toggle" id="trailsMini" type="button" aria-pressed="false" data-i18n="orbitsToggle">
               Orbits
             </button>
             <span class="mini-spacer" aria-hidden="true"></span>
-            <button class="mini-toggle mini-icon mini-reset" id="resetMini" type="button" aria-label="Reset view">
+            <button class="mini-toggle" id="langToggle" type="button" aria-label="Language">
+              EN
+            </button>
+            <button
+              class="mini-toggle mini-icon mini-reset"
+              id="resetMini"
+              type="button"
+              aria-label="Reset view"
+              data-i18n-aria="resetView"
+            >
               <svg viewBox="0 0 24 24" aria-hidden="true">
                 <path
                   d="M12 6V3L8 7l4 4V8c2.76 0 5 2.24 5 5a5 5 0 1 1-9.9-1h-2.02A7 7 0 1 0 12 6Z"
@@ -76,40 +91,40 @@
           <div class="controls-content">
             <div class="controls-grid">
             <label>
-            Time scale
+            <span data-i18n="timeScale">Time scale</span>
             <input id="speed" type="range" min="1" max="5" step="1" value="2" />
             <span id="speedValue">50000x</span>
           </label>
             <label>
-              Orbit scale
+              <span data-i18n="orbitScale">Orbit scale</span>
               <input id="scale" type="range" min="0.6" max="2.2" step="0.05" value="1" />
               <span id="scaleValue">1.00x</span>
             </label>
             <label>
-              Focus planet
+              <span data-i18n="focusPlanet">Focus planet</span>
               <select id="focus"></select>
             </label>
             <label>
-              Calendar date
+              <span data-i18n="calendarDate">Calendar date</span>
               <input id="calendarDate" type="date" />
             </label>
             <div class="camera">
-              <p class="camera-title">View point</p>
+              <p class="camera-title" data-i18n="viewPoint">View point</p>
               <div class="camera-actions">
-                <button data-view="iso">Isometric</button>
-                <button data-view="top">Top</button>
-                <button data-view="side">Side</button>
+                <button data-view="iso" data-i18n="viewIso">Isometric</button>
+                <button data-view="top" data-i18n="viewTop">Top</button>
+                <button data-view="side" data-i18n="viewSide">Side</button>
               </div>
               <label>
-                Camera distance
+                <span data-i18n="cameraDistance">Camera distance</span>
                 <input id="cameraDistance" type="range" min="2" max="240" step="2" value="100" />
               </label>
             </div>
             <div class="actions">
-              <button id="pause">Pause</button>
-              <button id="reset">Reset view</button>
+              <button id="pause" data-i18n="pause">Pause</button>
+              <button id="reset" data-i18n="resetView">Reset view</button>
             </div>
-            <p class="hint">
+            <p class="hint" data-i18n="hint">
               Tip: drag to orbit the camera, right-drag to pan, and scroll to zoom.
             </p>
             </div>
@@ -123,6 +138,7 @@
 
     <script src="vendor/three/three.min.js"></script>
     <script src="sim-core.js"></script>
+    <script src="i18n.js"></script>
     <script src="app.js"></script>
   </body>
 </html>
